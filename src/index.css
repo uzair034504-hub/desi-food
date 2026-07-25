@@ -1,0 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Archivo:wght@400;500;600&display=swap");
+
+:root {
+  /* Spice-market palette */
+  --bg: #241512;          /* roasted cumin, near-black brown */
+  --surface: #2f1c17;     /* slightly lifted panel */
+  --surface-2: #3a241d;   /* input bar / hover */
+  --border: #4a2f26;
+  --text: #f3e9dd;        /* cardamom cream */
+  --text-muted: #c7ac96;
+  --turmeric: #e8a33d;    /* primary accent */
+  --chili: #c4432b;       /* secondary accent */
+  --cardamom: #7ea383;    /* success / verified tag */
+
+  --font-display: "Fraunces", serif;
+  --font-body: "Archivo", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(232, 163, 61, 0.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(196, 67, 43, 0.16), transparent 32%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(232, 163, 61, 0.35);
+  color: var(--text);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+/* focus visibility for accessibility */
+:focus-visible {
+  outline: 2px solid var(--turmeric);
+  outline-offset: 2px;
+}

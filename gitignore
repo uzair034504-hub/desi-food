@@ -1,0 +1,16 @@
+# Environment secrets
+.env
+backend/.env
+
+# Node
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+backend/uploads/
+
+# Editor
+.vscode/
+.idea/
