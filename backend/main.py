@@ -23,9 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(BASE_DIR / ".env")
-load_dotenv(BASE_DIR.parent / ".env")
+load_dotenv()
 
 import db
 from llm import ask_llm, identify_ingredients_from_image, suggest_recipes_from_ingredients
@@ -35,13 +33,28 @@ from stores import find_nearby_stores, format_stores_reply
 app = FastAPI(title="Dastarkhwan AI Backend")
 
 # Allow the React dev server (and your deployed frontend) to call this API.
+_raw_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173")
+_allowed_origins_list = [o.strip() for o in _raw_allowed_origins.split(",") if o.strip()]
+
+print(f"[CORS DEBUG] Raw ALLOWED_ORIGINS env value: {_raw_allowed_origins!r}")
+print(f"[CORS DEBUG] Parsed allow_origins list: {_allowed_origins_list!r}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(","),
+    allow_origins=_allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/api/debug-cors")
+def debug_cors():
+    """Temporary debug endpoint - shows exactly what ALLOWED_ORIGINS the server sees."""
+    return {
+        "raw_env_value": _raw_allowed_origins,
+        "parsed_origins": _allowed_origins_list,
+    }
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
