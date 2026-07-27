@@ -1,5 +1,5 @@
 """
-Database layer — plain psycopg2, no ORM magic, so it's easy to read and modify.
+Database layer — plain psycopg (v3), no ORM magic, so it's easy to read and modify.
 Connects directly to your Postgres (Supabase's Postgres works fine here too —
 we just talk to it directly instead of going through Supabase's JS client).
 
@@ -13,8 +13,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-import psycopg2
-import psycopg2.extras
+import psycopg
+from psycopg.rows import dict_row
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -42,13 +42,13 @@ def _now() -> str:
 @contextmanager
 def get_conn():
     if not DATABASE_URL:
-        raise psycopg2.OperationalError("DATABASE_URL is not configured")
+        raise psycopg.OperationalError("DATABASE_URL is not configured")
 
     connect_kwargs = {}
     if "supabase.co" in DATABASE_URL and "sslmode=" not in DATABASE_URL:
         connect_kwargs["sslmode"] = "require"
 
-    conn = psycopg2.connect(DATABASE_URL, **connect_kwargs)
+    conn = psycopg.connect(DATABASE_URL, **connect_kwargs)
     try:
         yield conn
         conn.commit()
@@ -60,7 +60,7 @@ def get_conn():
 
 
 def dict_cursor(conn):
-    return conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    return conn.cursor(row_factory=dict_row)
 
 
 # ---------------------------------------------------------------
@@ -101,7 +101,7 @@ def search_knowledge_base(query: str) -> dict | None:
             row = cur.fetchone()
             if row:
                 return {"type": "sauce", "data": dict(row)}
-    except psycopg2.Error:
+    except psycopg.Error:
         return None
 
     return None
@@ -113,7 +113,7 @@ def match_recipes_by_ingredients(ingredient_names: list[str]) -> list[dict]:
             cur = dict_cursor(conn)
             cur.execute("SELECT * FROM recipes")
             recipes = cur.fetchall()
-    except psycopg2.Error:
+    except psycopg.Error:
         return []
 
     scored = []
@@ -141,7 +141,7 @@ def create_conversation(user_id: str, title: str = "New chat") -> dict:
                 (str(uuid.uuid4()), user_id, title),
             )
             return dict(cur.fetchone())
-    except psycopg2.Error:
+    except psycopg.Error:
         conversation_id = str(uuid.uuid4())
         payload = {
             "id": conversation_id,
@@ -163,7 +163,7 @@ def list_conversations(user_id: str) -> list[dict]:
                 (user_id,),
             )
             return [dict(r) for r in cur.fetchall()]
-    except psycopg2.Error:
+    except psycopg.Error:
         fallback = [
             item for item in _FALLBACK_CONVERSATIONS.values()
             if item.get("user_id") == user_id
@@ -180,7 +180,7 @@ def list_messages(conversation_id: str) -> list[dict]:
                 (conversation_id,),
             )
             return [dict(r) for r in cur.fetchall()]
-    except psycopg2.Error:
+    except psycopg.Error:
         return _FALLBACK_MESSAGES.get(conversation_id, [])
 
 
@@ -196,7 +196,7 @@ def save_message(conversation_id: str, role: str, content: str, image_url: str |
                 (str(uuid.uuid4()), conversation_id, role, content, image_url, source),
             )
             return dict(cur.fetchone())
-    except psycopg2.Error:
+    except psycopg.Error:
         message_id = str(uuid.uuid4())
         payload = {
             "id": message_id,
@@ -219,7 +219,7 @@ def log_pending_review(question: str, ai_answer: str):
                 "INSERT INTO pending_reviews (id, question, ai_generated_answer) VALUES (%s, %s, %s)",
                 (str(uuid.uuid4()), question, ai_answer),
             )
-    except psycopg2.Error:
+    except psycopg.Error:
         _FALLBACK_REVIEWS.append(
             {
                 "id": str(uuid.uuid4()),
