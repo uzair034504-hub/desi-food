@@ -1,0 +1,39 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Manrope", "sans-serif"],
+        display: ["Fraunces", "serif"],
+      },
+      colors: {
+        tadka: {
+          dark: "#1C1410",
+          panel: "#241A14",
+          panelLight: "#2E2119",
+          border: "#3A2A1F",
+          turmeric: "#E8A93C",
+          turmericDim: "#8A6526",
+          chili: "#C1442E",
+          cream: "#F5EDE1",
+          muted: "#B8A896",
+        },
+      },
+      borderRadius: {
+        karahi: "28px 28px 40px 40px",
+      },
+      keyframes: {
+        steam: {
+          "0%": { transform: "translateY(0) scale(1)", opacity: "0.0" },
+          "15%": { opacity: "0.35" },
+          "100%": { transform: "translateY(-140px) scale(1.6)", opacity: "0" },
+        },
+      },
+      animation: {
+        steam: "steam 6s ease-in infinite",
+      },
+    },
+  },
+  plugins: [],
+};
